@@ -3,9 +3,9 @@ const mysql = require('mysql');
 const config = {
     host: 'localhost',
     port: '3306',
-    user: 'labdev',
+    user: 'root',
     password: 'labpass',
-    database: 'limsdb',
+    database: 'labdb',
 };
 
 // Create a MySQL pool

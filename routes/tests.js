@@ -9,7 +9,7 @@ router.get('/', (req, res) => {
 
     if(groupId && !paramId && !methId){
         pool.query('SELECT DISTINCT ParamId, ParamValue, ParamDesc\t' +
-        'FROM TEST_GROUP_VIEW WHERE GroupId = ?', [groupId], (error, result) => {
+        'FROM test_group_view WHERE GroupId = ?', [groupId], (error, result) => {
            if (error) throw error;
    
            res.send(result);
@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
        return;
     }else if(groupId && paramId && !methId){
         pool.query('SELECT DISTINCT MethodId, MethodValue, MethodDesc\t' +
-        'FROM TEST_GROUP_VIEW WHERE GroupId = ? AND ParamId = ?', [groupId, paramId], (error, result) => {
+        'FROM test_group_view WHERE GroupId = ? AND ParamId = ?', [groupId, paramId], (error, result) => {
            if (error) throw error;
    
            res.send(result);
@@ -25,14 +25,14 @@ router.get('/', (req, res) => {
        return;
     }else if(groupId && paramId && methId){
         pool.query('SELECT MethodId, MethodValue, MethodDesc, Uom, XFLAG\t' +
-        'FROM TEST_GROUP_VIEW WHERE GroupId = ? AND ParamId = ? AND MethodId = ?', [groupId, paramId, methId], (error, result) => {
+        'FROM test_group_view WHERE GroupId = ? AND ParamId = ? AND MethodId = ?', [groupId, paramId, methId], (error, result) => {
            if (error) throw error;
    
            res.send(result);
        });
        return;
     }else{
-        pool.query('SELECT * FROM TEST_GROUP_VIEW', (error, result) => {
+        pool.query('SELECT * FROM test_group_view', (error, result) => {
             if (error) throw error;
     
             res.send(result);
@@ -42,7 +42,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/groups', (req, res) => {
-    pool.query('SELECT TG01.GPIX as GroupId, TG01.NAME as GroupValue, TG01.DESC as GroupDesc FROM TG01', (error, result) => {
+    pool.query('SELECT test_group_01.GPIX as GroupId, test_group_01.NAME as GroupValue, test_group_01.DESC as GroupDesc FROM test_group_01', (error, result) => {
         if (error) throw error;
 
         res.send(result);
