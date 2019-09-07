@@ -29,6 +29,7 @@ router.post('/', function (req, res) {
         "sampleName": payload.sampleName,
         "sampleDesc": payload.sampleDesc,        
         "sampleQty": payload.sampleQty,
+        "sampleCKey": payload.sampleCKey,
         "sampleCond": payload.sampleCond,
         "createdBy": payload.createdBy,
         "createdAt": new Date()

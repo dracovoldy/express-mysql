@@ -1,5 +1,6 @@
 const express = require('express');
 const pool = require('../data/config');
+const mysql = require('mysql');
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -7,58 +8,277 @@ router.get('/', (req, res) => {
     const labId = req.query.labId;
 
     if (jobId) {
-        pool.query('SELECT * FROM job_header as h WHERE h.jobId = ?', [jobId], (error, result) => {
-            if (error) throw error;
+        pool.query(`SELECT 
+        h.jobId,
+        h.jobDesc,
+        h.labId,
+        l.labName,
+        h.orderId,
+        o.orderDesc,
+        c.name as custName,
+        g.GPIX as groupId,
+        g.NAME as groupName,
+        g.DESC as groupDesc,
+        h.createdBy,
+        h.createdAt,
+        h.appvId,
+        h.appvAt,
+        h.status
+    FROM
+        labdb.job_header h
+            INNER JOIN
+        labdb.lab_master l ON h.labId = l.labId
+            INNER JOIN
+        labdb.order_trans o ON h.orderId = o.orderId
+            INNER JOIN
+        labdb.customer_master c ON o.custId = c.custId
+            INNER JOIN
+        labdb.test_group_01 g ON h.test_group = g.GPIX
+    WHERE
+        h.jobId = ?`, [jobId], (error, result) => {
+                if (error) throw error;
 
-            res.send(result);
-        });
+                res.send(result);
+            });
     } else if (labId) {
-        pool.query('SELECT * FROM job_header as h WHERE h.labId = ?', [labId], (error, result) => {
-            if (error) throw error;
+        pool.query(`SELECT 
+        h.jobId,
+        h.jobDesc,
+        h.labId,
+        l.labName,
+        h.orderId,
+        o.orderDesc,
+        c.name as custName,
+        g.GPIX as groupId,
+        g.NAME as groupName,
+        g.DESC as groupDesc,
+        h.createdBy,
+        h.createdAt,
+        h.appvId,
+        h.appvAt,
+        h.status
+    FROM
+        labdb.job_header h
+            INNER JOIN
+        labdb.lab_master l ON h.labId = l.labId
+            INNER JOIN
+        labdb.order_trans o ON h.orderId = o.orderId
+            INNER JOIN
+        labdb.customer_master c ON o.custId = c.custId
+            INNER JOIN
+        labdb.test_group_01 g ON h.test_group = g.GPIX
+    WHERE
+        h.labId = ?`, [labId], (error, result) => {
+                if (error) throw error;
 
-            res.send(result);
-        });
+                res.send(result);
+            });
     } else {
-        pool.query('SELECT * FROM job_header', (error, result) => {
-            if (error) throw error;
+        pool.query(`
+            SELECT 
+                h.jobId,
+                h.jobDesc,
+                h.labId,
+                l.labName,
+                h.orderId,
+                o.orderDesc,
+                c.name as custName,
+                g.GPIX as groupId,
+                g.NAME as groupName,
+                g.DESC as groupDesc,
+                h.createdBy,
+                h.createdAt,
+                h.appvId,
+                h.appvAt,
+                h.status
+            FROM
+                labdb.job_header h
+                    INNER JOIN
+                labdb.lab_master l ON h.labId = l.labId
+                    INNER JOIN
+                labdb.order_trans o ON h.orderId = o.orderId
+                    INNER JOIN
+                labdb.customer_master c ON o.custId = c.custId
+                    INNER JOIN
+                labdb.test_group_01 g ON h.test_group = g.GPIX`,
+            (error, result) => {
+                if (error) throw error;
 
-            res.send(result);
-        });
+                res.send(result);
+            });
     }
 });
 
-router.get('/:id/items', (req, res) => {
-    const jobId = req.params.id;
+router.get('/items', (req, res) => {
+    const jobId = req.query.jobId;
+    if (!jobId) {
+        return res.status(400).send({ error: "jobId required" });
+    }
 
-    pool.query('SELECT * FROM job_item as i WHERE i.jobId = ?', [jobId], (error, result) => {
-        if (error) throw error;
+    pool.query(`SELECT 
+    j.itemId,
+    j.shortDesc AS itemDesc,
+    t.GroupId,
+    t.GroupValue,
+    t.GroupDesc,
+    t.ParamId,
+    t.ParamValue,
+    t.ParamDesc,
+    t.MethodId,
+    t.MethodValue,
+    t.MethodDesc,
+    t.UoM,
+    s.sampleId,
+    s.sampleName,
+    s.sampleDesc,
+    s.sampleCond,
+    j.test_value,
+    j.performBy,
+    j.performAt,
+    j.XFLAG
+FROM
+    labdb.job_item j
+        INNER JOIN
+    labdb.test_group_view t ON j.test_group = t.GroupId
+        AND j.test_param = t.ParamId
+        AND j.test_meth = t.MethodId
+        INNER JOIN
+    labdb.sample_data s ON j.sampleId = s.sampleId
+WHERE
+    j.jobId = ?`, [jobId], (error, result) => {
+            if (error) throw error;
 
-        res.send(result);
-    });
+            res.send(result);
+        });
 });
 
-router.post('/items', (req, res) => {
+// update job (perform save)
+router.post('/performSave', (req, res) => {
 
-    let records = req.body.items.map((item) => {
-        let aItem = [item.jobId, item.sampleId, item.testGroupId, item.testParamId,
-        item.testMethId, item.desc, item.createdBy, new Date(), item.createdBy, new Date()];
+    var jobId = req.body.jobId;
 
+    // prepare records array of arrays
+    var aItems = req.body.items.map((obj) => {
+        let aItem = [obj.test_value, obj.performBy, new Date(), 'M', obj.jobId, obj.itemId];
         return aItem;
     });
 
-    // console.log(records);
-    // return;
+    var queries = '';
 
-    var sql = "INSERT INTO job_item (jobId, sampleId, test_group, test_param, test_meth, shortDesc, modifiedBy, modifiedAt, createdBy, createdAt) VALUES ?";
-
-    pool.query(sql, [records], function (error, results, fields) {
-        if (error) throw error;
-        return res.status(201).send(results);
+    aItems.forEach(function (aItem) {
+        queries += mysql.format("UPDATE `job_item` SET `test_value` = ?, `performBy` = ?, `performAt` = ?, `XFLAG` = ? WHERE (`jobId` = ?) and (`itemId` = ?); ", aItem);
     });
+
+    pool.query(queries, function (error, results, fields) {
+        if (error) {
+            return res.status(500).send({
+                error: true,
+                message: error
+            });
+        } else {
+            pool.query(mysql.format("UPDATE `job_header` SET `status` = 'P' WHERE (`jobId` = ?)", [jobId]));
+            return res.status(201).send({
+                "results": results
+            });
+        }
+    });
+
+});
+
+// perform submit
+router.post('/performSubmit', (req, res) => {
+
+    var jobId = req.body.jobId;
+
+    // prepare records array of arrays
+    var aItems = req.body.items.map((obj) => {
+        let aItem = [obj.test_value, obj.performBy, new Date(), 'T', obj.jobId, obj.itemId];
+        return aItem;
+    });
+
+    var queries = '';
+
+    aItems.forEach(function (aItem) {
+        queries += mysql.format("UPDATE `job_item` SET `test_value` = ?, `performBy` = ?, `performAt` = ?, `XFLAG` = ? WHERE (`jobId` = ?) and (`itemId` = ?); ", aItem);
+    });
+
+    pool.query(queries, function (error, results, fields) {
+        if (error) {
+            return res.status(500).send({
+                error: true,
+                message: error
+            });
+        } else {
+            // pool.query(mysql.format("UPDATE `job_header` SET `status` = 'P' WHERE (`jobId` = ?)", [jobId]));
+            pool.query(`SELECT 
+                            j.itemId,                            
+                            j.XFLAG
+                        FROM
+                            labdb.job_item j                                
+                        WHERE
+                            j.jobId = ?`,
+                [jobId],
+                (e1, r1) => {
+                    if (e1) {
+                        throw e1;
+                    } else {
+                        let cFlag = 0;
+                        r1.map(ro1 => {
+                            if (ro1.XFLAG !== 'T') {
+                                cFlag++;
+                            }
+                        });
+
+                        if (cFlag > 0) {
+                            //Set status to In Progress
+                            pool.query(mysql.format("UPDATE `job_header` SET `status` = 'P' WHERE (`jobId` = ?)", [jobId]), (e2, r2) => {
+                                if (e2) {
+                                    res.status(201).send({
+                                        "results": results,
+                                        "info_r1": r1,
+                                        "info_r2": e2
+                                    });
+                                    throw e2;
+                                } else {
+                                    return res.status(201).send({
+                                        "results": results,
+                                        "info_r1": r1,
+                                        "info_r2": r2
+                                    });
+                                }
+
+                            });
+                        } else if (cFlag <= 0) {
+                            //Set status Complete
+                            pool.query(mysql.format("UPDATE `job_header` SET `status` = 'C' WHERE (`jobId` = ?)", [jobId]), (e2, r2) => {
+                                if (e2) {
+                                    res.status(201).send({
+                                        "results": results,
+                                        "info_r1": r1,
+                                        "info_r2": e2
+                                    });
+                                    throw e2;
+                                } else {
+                                    return res.status(201).send({
+                                        "results": results,
+                                        "info_r1": r1,
+                                        "info_r2": r2
+                                    });
+                                }
+                            });
+                        }
+                    }
+
+                });
+
+
+        }
+    });
+
 });
 
 
-
+//create job
 router.post('/', function (req, res) {
 
     var headerPayload = req.body.header;
@@ -68,7 +288,7 @@ router.post('/', function (req, res) {
         "orderId": headerPayload.orderId,
         "labId": headerPayload.labId,
         "test_group": headerPayload.testGroup,
-        "jobDesc": headerPayload.jobDesc,        
+        "jobDesc": headerPayload.jobDesc,
         "createdBy": headerPayload.createdBy,
         "createdAt": new Date(),
         "appvId": headerPayload.approverId,
@@ -93,7 +313,7 @@ router.post('/', function (req, res) {
         });
     }
 
-    pool.query("INSERT INTO job_header SET ? ", jobHead, function (error, results) {
+    pool.query(`INSERT INTO job_header SET ? `, jobHead, function (error, results) {
         if (error) {
 
             return res.status(500).send({
@@ -113,7 +333,7 @@ router.post('/', function (req, res) {
                 return aItem;
             });
 
-            var sql = "INSERT INTO job_item (jobId, sampleId, test_group, test_param, test_meth, shortDesc, modifiedBy, modifiedAt, createdBy, createdAt) VALUES ?";
+            var sql = `INSERT INTO job_item (jobId, sampleId, test_group, test_param, test_meth, shortDesc, modifiedBy, modifiedAt, createdBy, createdAt) VALUES ?`;
 
             pool.query(sql, [records], function (error, results) {
                 if (error) {
@@ -133,13 +353,6 @@ router.post('/', function (req, res) {
         }
 
     });
-});
-
-router.post('/test', function (req, res) {
-
-    console.log(req);
-
-
 });
 
 module.exports = router;

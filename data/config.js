@@ -6,6 +6,7 @@ const config = {
     user: 'root',
     password: 'labpass',
     database: 'labdb',
+    multipleStatements: true
 };
 
 // Create a MySQL pool
