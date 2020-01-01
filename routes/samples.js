@@ -3,10 +3,10 @@ const pool = require('../data/config');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    const sampleId = req.query.sampleId;
+    const orderId = req.query.orderId;
 
-    if (sampleId) {
-        pool.query('SELECT * FROM sample_data as h WHERE h.sampleId = ?', [sampleId], (error, result) => {
+    if (orderId) {
+        pool.query('SELECT * FROM sample_data as h WHERE h.orderId = ?', [orderId], (error, result) => {
             if (error) throw error;
 
             res.send(result);

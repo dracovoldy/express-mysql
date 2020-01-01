@@ -2,7 +2,7 @@ const express = require('express');
 const pool = require('../data/config');
 const mysql = require('mysql');
 const router = express.Router();
-
+/* 
 router.get('/', (req, res) => {
     const jobId = req.query.jobId;
     const labId = req.query.labId;
@@ -151,6 +151,7 @@ WHERE
             res.send(result);
         });
 });
+*/
 
 // update job (perform save)
 router.post('/performSave', (req, res) => {
@@ -279,29 +280,28 @@ router.post('/performSubmit', (req, res) => {
 
 
 //create job
-router.post('/', function (req, res) {
-
-    var headerPayload = req.body.header;
+router.post('/', function (req, res) {    
 
     var jobHead = {
-        "jobId": null,
-        "orderId": headerPayload.orderId,
-        "labId": headerPayload.labId,
-        "test_group": headerPayload.testGroup,
-        "jobDesc": headerPayload.jobDesc,
-        "createdBy": headerPayload.createdBy,
-        "createdAt": new Date(),
-        "appvId": headerPayload.approverId,
-        "appvAt": null,
-        "modifiedBy": headerPayload.createdBy,
-        "modifiedAt": new Date(),
-        "status": null
+        "job_id": null,
+        "customer_id": req.body.hJob.customerId,
+        "order_id": req.body.hJob.orderId,
+        "lab_id": req.body.hJob.labId,
+        "dscpl_id": req.body.hJob.disciplineId,
+        "group_id": req.body.hJob.groupId,
+        "approver_id": req.body.hJob.approverId,
+        "status_code": null,
+        "header_desc": req.body.hJob.hText,
+        "createdBy": req.body.hJob.issuerId,
+        "createdAt": new Date(),        
+        "modifiedBy": null,
+        "modifiedAt": null        
     };
 
-    if (req.body.items.length < 1) {
+    if (req.body.iJob.length <= 0) {
         return res.status(400).send({
             error: true,
-            message: "Items cannot be empty"
+            message: "Job Items Missing Error"
         });
     }
 
@@ -309,7 +309,7 @@ router.post('/', function (req, res) {
     if (!jobHead) {
         return res.status(400).send({
             error: true,
-            message: 'Malformed job header'
+            message: 'Malformed Job Header'
         });
     }
 
@@ -326,14 +326,14 @@ router.post('/', function (req, res) {
             var jobId = results.insertId;
 
             // prepare records array of arrays
-            var records = req.body.items.map((item) => {
-                let aItem = [jobId, item.sampleId, item.testGroupId, item.testParamId,
-                    item.testMethId, item.desc, item.createdBy, new Date(), item.createdBy, new Date()];
+            var records = req.body.iJob.map((item) => {
+                let aItem = [jobId, item.sampleId, item.qty, item.qtyUom, item.testProduct, item.testMaster,
+                    item.testType, item.tcCode, item.qsCode, jobHead.createdBy, new Date()];
 
                 return aItem;
             });
 
-            var sql = `INSERT INTO job_item (jobId, sampleId, test_group, test_param, test_meth, shortDesc, modifiedBy, modifiedAt, createdBy, createdAt) VALUES ?`;
+            var sql = `INSERT INTO job_item (job_id, sample_id, qty_value, qty_uom, test_product, test_master, test_type, tc_flag, qs_flag, createdBy, createdAt) VALUES ?`;
 
             pool.query(sql, [records], function (error, results) {
                 if (error) {

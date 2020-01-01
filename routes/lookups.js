@@ -33,41 +33,41 @@ router.get('/users', (req, res) => {
 });
 
 // test groups lookups
-router.get('/testGroups', (req, res) => {
+// router.get('/testGroups', (req, res) => {
 
-    pool.query('SELECT * FROM test_group_01', (error, result) => {
-        if (error) throw error;
-        res.send(result);
-    });
+//     pool.query('SELECT * FROM test_group_01', (error, result) => {
+//         if (error) throw error;
+//         res.send(result);
+//     });
 
-});
-
-// test parameters lookups
-router.get('/testParams', (req, res) => {
-    let groupId = req.query.groupId;
-
-    if (groupId) {
-        pool.query('SELECT DISTINCT ParamId, Paramvalue, ParamDesc FROM test_group_view where GroupId = ?', [groupId], (error, result) => {
-            if (error) throw error;
-            res.send(result);
-        });
-    }
-
-});
+// });
 
 // test parameters lookups
-router.get('/testMethods', (req, res) => {
-    let groupId = req.query.groupId;
-    let paramId = req.query.paramId;
+// router.get('/testParams', (req, res) => {
+//     let groupId = req.query.groupId;
 
-    if (groupId && paramId) {
-        pool.query('SELECT DISTINCT MethodId, MethodValue, MethodDesc\t' +
-        'FROM test_group_view WHERE GroupId = ? AND ParamId = ?', [groupId, paramId], (error, result) => {
-            if (error) throw error;
-            res.send(result);
-        });
-    }
+//     if (groupId) {
+//         pool.query('SELECT DISTINCT ParamId, Paramvalue, ParamDesc FROM test_group_view where GroupId = ?', [groupId], (error, result) => {
+//             if (error) throw error;
+//             res.send(result);
+//         });
+//     }
 
-});
+// });
+
+// test parameters lookups
+// router.get('/testMethods', (req, res) => {
+//     let groupId = req.query.groupId;
+//     let paramId = req.query.paramId;
+
+//     if (groupId && paramId) {
+//         pool.query('SELECT DISTINCT MethodId, MethodValue, MethodDesc\t' +
+//         'FROM test_group_view WHERE GroupId = ? AND ParamId = ?', [groupId, paramId], (error, result) => {
+//             if (error) throw error;
+//             res.send(result);
+//         });
+//     }
+
+// });
 
 module.exports = router;
