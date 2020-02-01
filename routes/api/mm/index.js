@@ -1,6 +1,5 @@
-const express = require('express');
-const pool = require('../data/config');
-const router = express.Router();
+const pool = require('../../../data/config');
+const router = require('express').Router();
 
 router.get('/', (req, res) => {
     const orderId = req.query.orderId;
@@ -29,6 +28,7 @@ router.post('/', function (req, res) {
         "sampleName": payload.sampleName,
         "sampleDesc": payload.sampleDesc,        
         "sampleQty": payload.sampleQty,
+        "unit": payload.sampleUom,
         "sampleCKey": payload.sampleCKey,
         "sampleCond": payload.sampleCond,
         "createdBy": payload.createdBy,

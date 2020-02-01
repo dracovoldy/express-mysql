@@ -1,6 +1,5 @@
-const express = require('express');
-const pool = require('../data/config');
-const router = express.Router();
+const pool = require('../../../data/config');
+const router = require('express').Router();
 
 router.get('/disp', (req, res) => {
     pool.query('SELECT * FROM disp', (error, result) => {
