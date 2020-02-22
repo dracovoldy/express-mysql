@@ -52,12 +52,12 @@ router.get('/', (req, res) => {
  *  Status Codes: 000 ... Review Created
  *                001 ... Review Approved
  *                002 ... Review Rejected
- *                010 ... Job Created, Assigned
- *                010 ... Job Created, Unassigned, Future
- *                012 ... Job Suspended
+ *                011 ... Job Created, Unassigned
+ *                012 ... Job Assigned *                
  *                020 ... Job In-Progress
  *                021 ... Job Pending
  *                100 ... Job Finished
+*                 090 ... Job Suspended
  */
 router.post('/', (req, res) => {
     let { jobId, jobItem, comment, approver } = req.body;
@@ -77,11 +77,13 @@ router.post('/', (req, res) => {
         # Insert into job_apprv
         SELECT * FROM job_apprv FOR UPDATE;
         INSERT INTO job_apprv (job_id, job_item, action, createdBy, createdAt, comment)
-        VALUES (@id, @item, '001', @user, NOW(), @comment);
+        VALUES 
+        (@id, @item, '001', @user, NOW(), @comment),
+        (@id, @item, '011', @user, NOW(), @comment);
 
         # Update status
         UPDATE labdb.job_item i 
-        SET i.status = '001',
+        SET i.status = '011',
             i.modifiedBy = @user,
             i.modifiedAt = NOW()
         WHERE i.job_id = @id AND i.item_id = @item;

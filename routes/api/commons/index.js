@@ -23,11 +23,28 @@ router.get('/samples', (req, res) => {
 
 // user lookups
 router.get('/users', (req, res) => {
+    const { type } = req.query;
 
-    pool.query('SELECT * FROM user_master', (error, result) => {
-        if (error) throw error;
-        res.send(result);
-    });
+    switch (type) {
+        case 'ADMIN':
+            pool.query(`SELECT * FROM user_master WHERE userType = 'ADMIN'`, (error, result) => {
+                if (error) throw error;
+                res.send(result);
+            });
+            break;
+        case 'TESTER':
+            pool.query(`SELECT * FROM user_master WHERE userType = 'TESTER'`, (error, result) => {
+                if (error) throw error;
+                res.send(result);
+            });
+            break;
+        default:
+            pool.query(`SELECT * FROM user_master`, (error, result) => {
+                if (error) throw error;
+                res.send(result);
+            });
+    }
+
 
 });
 

@@ -2,16 +2,16 @@ const pool = require('../../../data/config');
 const router = require('express').Router();
 
 router.get('/', (req, res) => {
-    const custId = req.query.custId;
+    const orderId = req.query.orderId;
 
-    if (custId) {
-        pool.query('SELECT * FROM order_trans as h WHERE h.custId = ?', [custId], (error, result) => {
+    if (orderId) {
+        pool.query('SELECT * FROM sample_data as h WHERE h.orderId = ?', [orderId], (error, result) => {
             if (error) throw error;
 
             res.send(result);
         });
     } else {
-        pool.query('SELECT * FROM order_trans', (error, results) => {
+        pool.query('SELECT * FROM sample_data', (error, results) => {
             if (error) throw error;
 
             res.send(results);
@@ -23,25 +23,27 @@ router.post('/', function (req, res) {
 
     var payload = req.body;
 
-    var orderObj = {
-        "orderId": null,
-        "custId": payload.custId,
-        "orderDesc": payload.orderDesc,
+    var sampleObj = {
+        "orderId": payload.orderId,
+        "sampleName": payload.sampleName,
+        "sampleDesc": payload.sampleDesc,        
+        "sampleQty": payload.sampleQty,
+        "unit": payload.sampleUom,
+        "sampleCKey": payload.sampleCKey,
+        "sampleCond": payload.sampleCond,
         "createdBy": payload.createdBy,
-        "createdAt": new Date(),
-        "docRef": null,
-        "docDate": null
+        "createdAt": new Date()
     };
 
     // add validations later
-    if (!orderObj) {
+    if (!sampleObj) {
         return res.status(400).send({
             error: true,
-            message: 'Malformed orderObj'
+            message: 'Malformed sampleObj'
         });
     }
 
-    pool.query("INSERT INTO order_trans SET ? ", orderObj, function (error, results) {
+    pool.query("INSERT INTO sample_data SET ? ", sampleObj, function (error, results) {
         if (error) {
 
             return res.status(500).send({
@@ -53,14 +55,12 @@ router.post('/', function (req, res) {
 
             return res.status(201).send({
                 "results": results,
-                "orderId": results.insertId
+                "sampleId": results.insertId
             });
 
         }
 
     });
 });
-
-module.exports = router;
 
 module.exports = router;
