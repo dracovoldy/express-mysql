@@ -2,7 +2,7 @@ const pool = require('../../../data/config');
 const router = require('express').Router();
 
 /**
- *  GET: New Jobs with status '011'
+ *  GET: New Jobs (Unassigned) with status '011'
  */
 router.get('/', (req, res) => {
 
@@ -163,7 +163,7 @@ router.post('/', (req, res, next) => {
             SELECT * FROM job_apprv FOR UPDATE;
             INSERT INTO job_apprv (job_id, job_item, action, actionUser, createdBy, createdAt, comment)
             VALUES 
-            (@id, @item, '012', @user, 'MALLIKA', NOW(), @comment);
+            (@id, @item, '012', @user, 'MALLIKA', NOW(), 'JOB ASSIGNED');
     
             # Update status
             UPDATE labdb.job_item i 

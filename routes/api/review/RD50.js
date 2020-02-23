@@ -78,8 +78,8 @@ router.post('/', (req, res) => {
         SELECT * FROM job_apprv FOR UPDATE;
         INSERT INTO job_apprv (job_id, job_item, action, createdBy, createdAt, comment)
         VALUES 
-        (@id, @item, '001', @user, NOW(), @comment),
-        (@id, @item, '011', @user, NOW(), @comment);
+        (@id, @item, '001', @user, NOW(), 'REVIEW DOCUMENT APPROVED'),
+        (@id, @item, '011', @user, NOW(), 'JOB DOCUMENT CREATED');
 
         # Update status
         UPDATE labdb.job_item i 
