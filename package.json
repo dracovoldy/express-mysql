@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +14,6 @@
     "express": "^4.16.4",
     "helmet": "^3.16.0",
     "joi": "^14.3.1",
-    "morgan": "^1.9.1",
     "mysql": "^2.16.0"
   }
 }
